@@ -1,14 +1,26 @@
 import string
+import re
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from wordcloud import WordCloud
 import matplotlib.pyplot as size
+import nltk
+nltk.download('punkt_tab')  # Pastikan untuk mengunduh tokenizer
+nltk.download('stopwords')  # Pastikan untuk mengunduh stopwords
 
-text = open('reviews.csv', encoding='UTF-8').read() # Membuka Data Reviews.csv
+def clean_review_text(text): #Cleaning text untuk menghapus bagian yang tidak diinginkan
+    pattern = r'\d+ out of \d+ found this helpful\.\s+Was this review helpful\?\s+Sign in to vote\.\s+Permalink'
+    cleaned_text = re.sub(pattern, '', text)
+    return cleaned_text
+
+text = open('reviews.csv', encoding='UTF-8').read()  # Membuka Data Reviews.csv
+
+# Bersihkan bagian teks yang tidak diinginkan
+text = clean_review_text(text)
 lowercase = text.lower() # Mengubah semua kata menjadi lowercased
 cleaned_word = lowercase.translate(str.maketrans('', '', string.punctuation)) # Menghilangkan semua punctuation
-tokenized_word = word_tokenize(cleaned_word, "english") # Mengtokenized atau menjadikan sebuah sentence menjadi perkata
+tokenized_word = word_tokenize(cleaned_word) # Mengtokenized atau menjadikan sebuah sentence menjadi perkata
 
 final_words = [] #List finalword
 for word in tokenized_word:
@@ -46,7 +58,7 @@ def generate_and_show_wordcloud(words_list, title):
     size.figure(figsize=(10, 5))
     size.imshow(wordcloud, interpolation='bilinear')
     size.axis("off")
-    size.title(title, fontsize=16)  
+    size.title(title, fontsize=16)
     size.show()
 
 # Membuat Word Cloud untuk setiap sentimen
