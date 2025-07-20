@@ -2,24 +2,20 @@ import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from tkinter import filedialog, messagebox
 import pandas as pd
-import string
-import re
-import nltk
+import string, re
 import matplotlib.pyplot as plt
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk import download
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
-from nltk.corpus import stopwords, wordnet
-from nltk.tokenize import word_tokenize
-from nltk.stem import WordNetLemmatizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import classification_report, confusion_matrix, ConfusionMatrixDisplay
 from sklearn.utils import resample
 
 # Unduh stopwords dan tokenizer
-nltk.download('punkt')
-nltk.download('stopwords')
-nltk.download('wordnet')
-nltk.download('omw-1.4')
+download('punkt')
+download('stopwords')
 
 # ------------------------- Text Preprocessing ------------------------- #
 def clean_review_text(text):
@@ -28,15 +24,12 @@ def clean_review_text(text):
     return cleaned_text
 
 def preprocess_text(text):
-    lemmatizer = WordNetLemmatizer()
-    stop_words = set(stopwords.words('english'))
-
-    text = clean_review_text(str(text))
+    text = clean_review_text(text)
     text = text.lower()
     text = text.translate(str.maketrans('', '', string.punctuation))
     tokens = word_tokenize(text)
-
-    filtered = [lemmatizer.lemmatize(word) for word in tokens if word not in stop_words]
+    stop_words = set(stopwords.words('english'))
+    filtered = [word for word in tokens if word not in stop_words]
     return " ".join(filtered)
 
 def label_sentiment(rating):
@@ -68,7 +61,7 @@ def process_and_train(filepath):
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, stratify=y, random_state=42)
 
-    vectorizer = TfidfVectorizer(ngram_range=(1, 2))
+    vectorizer = TfidfVectorizer()
     X_train_vec = vectorizer.fit_transform(X_train)
     X_test_vec = vectorizer.transform(X_test)
 
@@ -107,13 +100,13 @@ def predict_custom_text():
 app = ttk.Window(title="🎀 Naive Bayes Sentiment Analyzer", themename="litera", size=(600, 400))
 app.resizable(False, False)
 
-label = ttk.Label(app, text="📝 Pilih file CSV review kamu:", font=("Roboto", 16), bootstyle="info")
+label = ttk.Label(app, text="📝 Pilih file CSV review kamu:", font=("Comic Sans MS", 14), bootstyle="info")
 label.pack(pady=20)
 
 btn_load = ttk.Button(app, text="📁 Pilih File CSV & Latih Model", bootstyle="success-outline", command=lambda: process_and_train(filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])))
 btn_load.pack(pady=10)
 
-entry_label = ttk.Label(app, text="Coba input teks kamu sendiri:", font=("Helvetica", 12), bootstyle="secondary")
+entry_label = ttk.Label(app, text="Coba input teks kamu sendiri:", font=("Comic Sans MS", 12))
 entry_label.pack(pady=10)
 
 entry = ttk.Entry(app, width=50)
